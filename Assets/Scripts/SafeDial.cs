@@ -21,52 +21,17 @@ public class SafeDial : MonoBehaviour
 
     public bool IsUnlocked = false;
 
-    // --- Nuevo ---
     public static SafeDial currentDial; // el dial actualmente seleccionado
 
     private void Start()
     {
-        // Generar combinación aleatoria si no está asignada
-        for (int i = 0; i < 3; i++)
-            combination[i] = Random.Range(0, 100);
+        GenerateCombination();
 
         dialPosition = 0;
         stageStartPos = 0;
         stepsAfterMinTurns = 0;
 
         Debug.Log($"[Dial {dialName}] Combinación: {combination[0]} der(2 vueltas), {combination[1]} izq(2 pasos por cero), {combination[2]} der(directa)");
-    }
-
-    private void Update()
-    {
-        // Cambiar dial activo con A y D
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            SelectDial("Izquierda");
-        }
-        else if (Input.GetKeyDown(KeyCode.D))
-        {
-            SelectDial("Derecha");
-        }
-
-        // Si este dial es el seleccionado, lo muevo con la ruedita
-        if (currentDial == this && !IsUnlocked)
-        {
-            float scroll = -Input.GetAxis("Mouse ScrollWheel");
-            if (scroll > 0f)
-            {
-                Rotate(1); // derecha
-            }
-            else if (scroll < 0f)
-            {
-                Rotate(-1); // izquierda
-            }
-        }
-    }
-
-    public void PlayStepSound()
-    {
-        if (clickSound != null) clickSound.Play();
     }
 
     public void Rotate(int dir) // dir = 1 derecha, -1 izquierda
@@ -172,17 +137,9 @@ public class SafeDial : MonoBehaviour
         return IsUnlocked;
     }
 
-    // --- Nuevo: selección del dial activo ---
-    private void SelectDial(string targetName)
+    void GenerateCombination()
     {
-        foreach (SafeDial dial in FindObjectsOfType<SafeDial>())
-        {
-            if (dial.dialName == targetName)
-            {
-                currentDial = dial;
-                Debug.Log($"Dial seleccionado: {dial.dialName}");
-                break;
-            }
-        }
+        for (int i = 0; i < 3; i++)
+            combination[i] = Random.Range(0, 90);
     }
 }
