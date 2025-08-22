@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class InputPlayer : MonoBehaviour
@@ -8,29 +6,54 @@ public class InputPlayer : MonoBehaviour
     [SerializeField] private SafeDial[] totalOfDials;
     private SafeDial currentSafe;
 
-    private float stepSize = 4f;        // 360° / 90 posiciones
-    [SerializeField] private int countSafe = 1;
+    private float stepSize = 3.6f;        // 360° / 100 posiciones
+    [SerializeField] private int countSafe = 0;
+
+    private int unlockedSafes = 0;        // cuántos diales fueron abiertos
+
+    [Header("Rotación")]
+    public float rotationSpeed = 10f;     // pasos por segundo
+    private float rotationTimer = 0f;     // acumulador de tiempo
+
+    private void Start()
+    {
+        if (totalOfDials.Length > 0)
+        {
+            currentDial = totalOfDials[countSafe].gameObject;
+            CheckCurrentSafe();
+        }
+    }
 
     private void Update()
     {
         MovePlayerToDials();
         HandleInput();
-        CheckInputConfirm();
+        CheckFinalConfirm();
     }
 
     void HandleInput()
     {
-        if (currentSafe != null)
+        if (currentSafe != null && !currentSafe.IsUnlocked)
         {
-            if (Input.GetKeyDown(KeyCode.RightArrow))
+            int dir = 0;
+
+            if (Input.GetKey(KeyCode.RightArrow)) dir = 1;
+            else if (Input.GetKey(KeyCode.LeftArrow)) dir = -1;
+
+            if (dir != 0)
             {
-                currentSafe.dialPosition = (currentSafe.dialPosition + 1) % 90;
-                currentSafe.PlayStepSound();
+                rotationTimer += Time.deltaTime * rotationSpeed;
+
+                while (rotationTimer >= 1f) // cada paso entero
+                {
+                    rotationTimer -= 1f;
+                    currentSafe.Rotate(dir);
+                    currentSafe.PlayStepSound();
+                }
             }
-            else if (Input.GetKeyDown(KeyCode.LeftArrow))
+            else
             {
-                currentSafe.dialPosition = (currentSafe.dialPosition - 1 + 90) % 90;
-                currentSafe.PlayStepSound();
+                rotationTimer = 0f; // solté la tecla, reseteo acumulador
             }
 
             // Rotación visual
@@ -38,26 +61,28 @@ public class InputPlayer : MonoBehaviour
         }
     }
 
-    void CheckInputConfirm()
+    void CheckFinalConfirm()
     {
-        CheckCurrentSafe();
-
         if (Input.GetKeyDown(KeyCode.Space) && currentSafe != null)
         {
-            if (currentSafe.stageUnlocked)
+            if (currentSafe.IsCompleted())
             {
-                currentSafe.confirmSound.Play(); // sonido de la barra solo si es correcto
-                Debug.Log($"¡Número correcto en etapa {currentSafe.currentStage + 1}!");
-                currentSafe.currentStage++;
+                Debug.Log($"¡Dial {currentSafe.dialName} desbloqueado!");
 
-                if (currentSafe.currentStage >= 3)
-                    Debug.Log("¡Ganaste! Caja fuerte abierta.");
-                else
-                    currentSafe.stageUnlocked = false;
+                if (!currentSafe.IsUnlocked)
+                {
+                    currentSafe.IsUnlocked = true;
+                    unlockedSafes++;
+                }
+
+                if (unlockedSafes >= totalOfDials.Length)
+                {
+                    Debug.Log("¡Ganaste! Todos los diales desbloqueados, caja fuerte abierta.");
+                }
             }
             else
             {
-                Debug.Log("No estás en el número correcto. Seguí buscando.");
+                Debug.Log("Todavía no completaste la combinación de este dial.");
             }
         }
     }
@@ -72,17 +97,19 @@ public class InputPlayer : MonoBehaviour
 
     void MovePlayerToDials()
     {
-        SafeDial[] totalSafes = totalOfDials;
-
-        if (currentDial == null)
-        {
-            currentDial = totalSafes[countSafe].gameObject;
-        }
-
         if (Input.GetKeyDown(KeyCode.A))
-            currentDial = totalSafes[countSafe -= 1].gameObject;
+        {
+            countSafe = Mathf.Clamp(countSafe - 1, 0, totalOfDials.Length - 1);
+            currentDial = totalOfDials[countSafe].gameObject;
+            CheckCurrentSafe();
+            Debug.Log($"Cambiado al dial {currentSafe.dialName}");
+        }
         else if (Input.GetKeyDown(KeyCode.D))
-            currentDial = totalSafes[countSafe += 1].gameObject;
+        {
+            countSafe = Mathf.Clamp(countSafe + 1, 0, totalOfDials.Length - 1);
+            currentDial = totalOfDials[countSafe].gameObject;
+            CheckCurrentSafe();
+            Debug.Log($"Cambiado al dial {currentSafe.dialName}");
+        }
     }
-
 }
