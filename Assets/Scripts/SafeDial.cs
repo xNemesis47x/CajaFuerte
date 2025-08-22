@@ -23,6 +23,11 @@ public class SafeDial : MonoBehaviour
 
     public static SafeDial currentDial; // el dial actualmente seleccionado
 
+    [Header("Visual Indicator")]
+    public SpriteRenderer stageIndicator; // asignar en inspector
+    public Color normalColor = Color.white;
+    public Color readyColor = Color.green;
+
     private void Start()
     {
         GenerateCombination();
@@ -31,7 +36,10 @@ public class SafeDial : MonoBehaviour
         stageStartPos = 0;
         stepsAfterMinTurns = 0;
 
-        Debug.Log($"[Dial {dialName}] Combinación: {combination[0]} der(2 vueltas), {combination[1]} izq(2 pasos por cero), {combination[2]} der(directa)");
+        if (stageIndicator != null)
+            stageIndicator.color = normalColor;
+
+        Debug.Log($"[Dial {dialName}] Combinación: {combination[0]} der(1 vuelta), {combination[1]} izq(1 vuelta), {combination[2]} der(1 vuelta)");
     }
 
     public void Rotate(int dir) // dir = 1 derecha, -1 izquierda
@@ -47,14 +55,16 @@ public class SafeDial : MonoBehaviour
         // Contar pasos por cero según la etapa y dirección
         if (currentStage == 0 && dir == 1 && lastPosition == 99 && dialPosition == 0) zeroPasses++;
         if (currentStage == 1 && dir == -1 && lastPosition == 0 && dialPosition == 99) zeroPasses++;
-        if (currentStage == 2 && dir == 1 && lastPosition == 99 && dialPosition == 0) zeroPasses++; // cuenta cada paso por cero
+        if (currentStage == 2 && dir == 1 && lastPosition == 99 && dialPosition == 0) zeroPasses++;
 
         // Contar pasos después de las vueltas mínimas
-        if ((currentStage == 0 && zeroPasses >= 2 && dir == 1) ||
-            (currentStage == 1 && zeroPasses >= 2 && dir == -1) ||
-            (currentStage == 2 && zeroPasses >= 2 && dir == 1)) // <-- 2 vueltas obligatorias ahora
+        if ((currentStage == 0 && zeroPasses >= 1) ||
+            (currentStage == 1 && zeroPasses >= 1) ||
+            (currentStage == 2 && zeroPasses >= 1))
         {
             stepsAfterMinTurns++;
+            if (stageIndicator != null)
+                stageIndicator.color = readyColor; // cambiar color al estar listo para el número
         }
 
         if (clickSound != null) clickSound.Play();
@@ -68,10 +78,10 @@ public class SafeDial : MonoBehaviour
     {
         switch (currentStage)
         {
-            case 0: // Etapa 0: derecha, mínimo 2 vueltas
+            case 0: // Etapa 0: derecha, mínimo 1 vuelta
                 if (lastMoveDir != 1) { ResetSafe("Debías girar a la derecha."); return; }
 
-                if (zeroPasses >= 2)
+                if (zeroPasses >= 1)
                 {
                     int targetSteps = ((100 - combination[0]) % 100) + 1;
                     if (stepsAfterMinTurns == targetSteps)
@@ -82,14 +92,15 @@ public class SafeDial : MonoBehaviour
                         zeroPasses = 0;
                         stepsAfterMinTurns = 0;
                         stageStartPos = dialPosition;
+                        if (stageIndicator != null) stageIndicator.color = normalColor;
                     }
                 }
                 break;
 
-            case 1: // Etapa 1: izquierda, mínimo 2 pasos por cero
+            case 1: // Etapa 1: izquierda, mínimo 1 vuelta
                 if (lastMoveDir != -1) { ResetSafe("Debías girar a la izquierda."); return; }
 
-                if (zeroPasses >= 2)
+                if (zeroPasses >= 1)
                 {
                     int targetSteps = combination[1];
                     if (stepsAfterMinTurns == targetSteps)
@@ -100,16 +111,16 @@ public class SafeDial : MonoBehaviour
                         zeroPasses = 0;
                         stepsAfterMinTurns = 0;
                         stageStartPos = dialPosition;
+                        if (stageIndicator != null) stageIndicator.color = normalColor;
                     }
                 }
                 break;
 
-            case 2: // Etapa 2: derecha directa con vuelta extra
+            case 2: // Etapa 2: derecha directa con mínimo 1 vuelta
                 if (lastMoveDir != 1) { ResetSafe("Debías girar a la derecha."); return; }
 
                 int targetSteps2 = ((100 - combination[2]) % 100) + 1;
 
-                // Validar solo si ya se hizo la vuelta obligatoria
                 if (zeroPasses >= 1 && stepsAfterMinTurns == targetSteps2)
                 {
                     if (correctSound != null) correctSound.Play();
@@ -117,6 +128,7 @@ public class SafeDial : MonoBehaviour
                     Debug.Log($"[Dial {dialName}] ¡Combinación completa ({combination[2]})!");
                     currentStage++;
                     IsUnlocked = true;
+                    if (stageIndicator != null) stageIndicator.color = readyColor;
                 }
                 break;
         }
@@ -130,6 +142,8 @@ public class SafeDial : MonoBehaviour
         stepsAfterMinTurns = 0;
         dialPosition = 0;
         stageStartPos = 0;
+        if (stageIndicator != null)
+            stageIndicator.color = normalColor;
     }
 
     public bool IsCompleted()
