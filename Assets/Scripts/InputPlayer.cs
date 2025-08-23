@@ -22,7 +22,6 @@ public class InputPlayer : MonoBehaviour
     {
         MovePlayerToDials();
         HandleInput();
-        CheckFinalConfirm();
     }
 
     void HandleInput()
@@ -40,32 +39,6 @@ public class InputPlayer : MonoBehaviour
             }
 
             currentSafe.transform.localRotation = Quaternion.Euler(0f, 0f, -currentSafe.dialPosition * stepSize);
-        }
-    }
-
-    void CheckFinalConfirm()
-    {
-        if (Input.GetKeyDown(KeyCode.Space) && currentSafe != null)
-        {
-            if (currentSafe.IsCompleted())
-            {
-                Debug.Log($"¡Dial {currentSafe.dialName} desbloqueado!");
-
-                if (!currentSafe.IsUnlocked)
-                {
-                    currentSafe.IsUnlocked = true;
-                    unlockedSafes++;
-                }
-
-                if (unlockedSafes >= totalOfDials.Length)
-                {
-                    Debug.Log("¡Ganaste! Todos los diales desbloqueados, caja fuerte abierta.");
-                }
-            }
-            else
-            {
-                Debug.Log("Todavía no completaste la combinación de este dial.");
-            }
         }
     }
 

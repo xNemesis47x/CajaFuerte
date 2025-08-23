@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 
 public class SafeDial : MonoBehaviour
 {
@@ -9,7 +10,8 @@ public class SafeDial : MonoBehaviour
     public AudioSource correctSound;
     public AudioSource confirmSound;
 
-    private int[] combination = new int[3];
+    [SerializeField] private TMP_Text textCombination;
+    public int[] combination = new int[3];
     private int currentStage = 0;
 
     private int lastMoveDir = 0;      // 1 = derecha, -1 = izquierda
@@ -18,21 +20,27 @@ public class SafeDial : MonoBehaviour
 
     private int stageStartPos = 0;    // posición donde empieza cada etapa
     private int stepsAfterMinTurns = 0; // pasos contados después de las vueltas mínimas
+    private int completeStages = 0;
 
     public bool IsUnlocked = false;
 
     public static SafeDial currentDial; // el dial actualmente seleccionado
 
     [Header("Visual Indicator")]
-    public SpriteRenderer stageIndicator; // asignar en inspector
+    private SpriteRenderer stageIndicator; // asignar en inspector
     public Color normalColor = Color.white;
     public Color readyColor = Color.green;
+
+    private void Awake()
+    {
+        stageIndicator = GetComponent<SpriteRenderer>();
+    }
 
     private void Start()
     {
         GenerateCombination();
 
-        dialPosition = 0;
+        dialPosition = 0;   
         stageStartPos = 0;
         stepsAfterMinTurns = 0;
 
@@ -63,8 +71,6 @@ public class SafeDial : MonoBehaviour
             (currentStage == 2 && zeroPasses >= 1))
         {
             stepsAfterMinTurns++;
-            if (stageIndicator != null)
-                stageIndicator.color = readyColor; // cambiar color al estar listo para el número
         }
 
         if (clickSound != null) clickSound.Play();
@@ -93,6 +99,12 @@ public class SafeDial : MonoBehaviour
                         stepsAfterMinTurns = 0;
                         stageStartPos = dialPosition;
                         if (stageIndicator != null) stageIndicator.color = normalColor;
+
+                        if (completeStages == 0)
+                        {
+                            textCombination.text = $"{combination[0]}";
+                            completeStages++;
+                        }
                     }
                 }
                 break;
@@ -112,6 +124,12 @@ public class SafeDial : MonoBehaviour
                         stepsAfterMinTurns = 0;
                         stageStartPos = dialPosition;
                         if (stageIndicator != null) stageIndicator.color = normalColor;
+
+                        if (completeStages == 1)
+                        {
+                            textCombination.text += $", {combination[1]}";
+                            completeStages++;
+                        }
                     }
                 }
                 break;
@@ -129,6 +147,12 @@ public class SafeDial : MonoBehaviour
                     currentStage++;
                     IsUnlocked = true;
                     if (stageIndicator != null) stageIndicator.color = readyColor;
+
+                    if (completeStages == 2)
+                    {
+                        completeStages++;
+                        textCombination.text += $", {combination[2]}";
+                    }
                 }
                 break;
         }
