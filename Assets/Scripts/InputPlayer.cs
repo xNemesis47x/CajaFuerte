@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class InputPlayer : MonoBehaviour
 {
@@ -10,7 +11,8 @@ public class InputPlayer : MonoBehaviour
     [SerializeField] private int countSafe = 0;
     public GameObject puntero;
 
-    private int unlockedSafes = 0;        // cuántos diales fueron abiertos
+    private float stepDelay = 0.1f; // tiempo entre pasos
+    private float stepTimer = 0f;
 
     private void Start()
     {
@@ -20,7 +22,6 @@ public class InputPlayer : MonoBehaviour
 
     private void Update()
     {
-        MovePlayerToDials();
         HandleInput();
     }
 
@@ -28,14 +29,20 @@ public class InputPlayer : MonoBehaviour
     {
         if (currentSafe != null && !currentSafe.IsUnlocked)
         {
-            float scroll = -Input.GetAxis("Mouse ScrollWheel");
-            if (scroll > 0f)
+            stepTimer -= Time.deltaTime;
+
+            if (stepTimer <= 0f)
             {
-                currentSafe.Rotate(1); // derecha
-            }
-            else if (scroll < 0f)
-            {
-                currentSafe.Rotate(-1); // izquierda
+                if (Input.GetKey(KeyCode.RightArrow))
+                {
+                    currentSafe.Rotate(1);
+                    stepTimer = stepDelay;
+                }
+                else if (Input.GetKey(KeyCode.LeftArrow))
+                {
+                    currentSafe.Rotate(-1);
+                    stepTimer = stepDelay;
+                }
             }
 
             currentSafe.transform.localRotation = Quaternion.Euler(0f, 0f, -currentSafe.dialPosition * stepSize);
@@ -50,26 +57,13 @@ public class InputPlayer : MonoBehaviour
         }
     }
 
-    void MovePlayerToDials()
+    public void MovePlayerToDials()
     {
-        Vector3 posPunter = puntero.transform.position;
-
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            countSafe = Mathf.Clamp(countSafe - 1, 0, totalOfDials.Length - 1);
-            currentDial = totalOfDials[countSafe].gameObject;
-            CheckCurrentSafe();
-            CheckPunteroPosition(currentSafe.transform);
-            Debug.Log($"Cambiado al dial {currentSafe.dialName}");
-        }
-        else if (Input.GetKeyDown(KeyCode.D))
-        {
-            countSafe = Mathf.Clamp(countSafe + 1, 0, totalOfDials.Length - 1);
-            currentDial = totalOfDials[countSafe].gameObject;
-            CheckCurrentSafe();
-            CheckPunteroPosition(currentSafe.transform);
-            Debug.Log($"Cambiado al dial {currentSafe.dialName}");
-        }
+        countSafe = Mathf.Clamp(countSafe + 1, 0, totalOfDials.Length - 1);
+        currentDial = totalOfDials[countSafe].gameObject;
+        CheckCurrentSafe();
+        CheckPunteroPosition(currentSafe.transform);
+        Debug.Log($"Cambiado al dial {currentSafe.dialName}");
     }
 
     void CheckPunteroPosition(Transform transform)

@@ -1,4 +1,6 @@
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI; // para usar UI Text
 
 public class CountdownTimer : MonoBehaviour
@@ -6,7 +8,10 @@ public class CountdownTimer : MonoBehaviour
     public float startTime = 45f; // tiempo inicial en segundos, modificable desde el Inspector
     private float timeRemaining;
 
-    public Text timerText; // arrastrar un Text de UI aquí desde el Canvas
+    public TMP_Text timerText; // arrastrar un Text de UI aquí desde el Canvas
+    public GameObject generalPanel;
+
+    public int unlockedSafes;
 
     private bool timerRunning = true;
 
@@ -44,7 +49,29 @@ public class CountdownTimer : MonoBehaviour
     void TimerFinished()
     {
         Debug.Log("Tiempo terminado!");
-        // Aquí podés poner lo que pasa cuando el timer llega a cero
+
+        Time.timeScale = 0f;
+        TMP_Text tempText = generalPanel.GetComponentInChildren<TMP_Text>(true);
+        tempText.text = "YOU LOST";
+        generalPanel.SetActive(true);
+    }
+
+    public void ResetGame()
+    {
+        SceneManager.LoadScene("Game");
+        Time.timeScale = 1f;
+    }
+
+    public void CheckWin()
+    {
+        if (unlockedSafes >= 3)
+        {
+            Time.timeScale = 0f;
+            TMP_Text tempText = generalPanel.GetComponentInChildren<TMP_Text>(true);
+            tempText.text = "YOU WIN";
+            generalPanel.SetActive(true);
+        }
+
     }
 
     // --- Opcional: reiniciar timer desde código ---

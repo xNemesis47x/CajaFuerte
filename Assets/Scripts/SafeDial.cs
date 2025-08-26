@@ -26,6 +26,9 @@ public class SafeDial : MonoBehaviour
 
     public static SafeDial currentDial; // el dial actualmente seleccionado
 
+    CountdownTimer timer;
+    InputPlayer inputPlayer;
+
     [Header("Visual Indicator")]
     private SpriteRenderer stageIndicator; // asignar en inspector
     public Color normalColor = Color.white;
@@ -38,6 +41,9 @@ public class SafeDial : MonoBehaviour
 
     private void Start()
     {
+        timer = FindObjectOfType<CountdownTimer>();
+        inputPlayer = FindObjectOfType<InputPlayer>();
+        
         GenerateCombination();
 
         dialPosition = 0;   
@@ -145,7 +151,10 @@ public class SafeDial : MonoBehaviour
                     if (confirmSound != null) confirmSound.Play();
                     Debug.Log($"[Dial {dialName}] ¡Combinación completa ({combination[2]})!");
                     currentStage++;
+                    timer.unlockedSafes++;
                     IsUnlocked = true;
+                    timer.CheckWin();
+                    inputPlayer.MovePlayerToDials();
                     if (stageIndicator != null) stageIndicator.color = readyColor;
 
                     if (completeStages == 2)
@@ -178,6 +187,6 @@ public class SafeDial : MonoBehaviour
     void GenerateCombination()
     {
         for (int i = 0; i < 3; i++)
-            combination[i] = Random.Range(0, 90);
+            combination[i] = Random.Range(1, 90);
     }
 }
