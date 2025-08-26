@@ -23,16 +23,16 @@ public class SafeDial : MonoBehaviour
     private int completeStages = 0;
 
     public bool IsUnlocked = false;
+    public bool isCompleted;
 
     public static SafeDial currentDial; // el dial actualmente seleccionado
-
-    CountdownTimer timer;
-    InputPlayer inputPlayer;
 
     [Header("Visual Indicator")]
     private SpriteRenderer stageIndicator; // asignar en inspector
     public Color normalColor = Color.white;
     public Color readyColor = Color.green;
+
+    public SpriteRenderer StageIndicator { get => stageIndicator; set => stageIndicator = value; }
 
     private void Awake()
     {
@@ -41,12 +41,9 @@ public class SafeDial : MonoBehaviour
 
     private void Start()
     {
-        timer = FindObjectOfType<CountdownTimer>();
-        inputPlayer = FindObjectOfType<InputPlayer>();
-        
         GenerateCombination();
 
-        dialPosition = 0;   
+        dialPosition = 0;
         stageStartPos = 0;
         stepsAfterMinTurns = 0;
 
@@ -148,14 +145,9 @@ public class SafeDial : MonoBehaviour
                 if (zeroPasses >= 1 && stepsAfterMinTurns == targetSteps2)
                 {
                     if (correctSound != null) correctSound.Play();
-                    if (confirmSound != null) confirmSound.Play();
                     Debug.Log($"[Dial {dialName}] ¡Combinación completa ({combination[2]})!");
                     currentStage++;
-                    timer.unlockedSafes++;
-                    IsUnlocked = true;
-                    timer.CheckWin();
-                    inputPlayer.MovePlayerToDials();
-                    if (stageIndicator != null) stageIndicator.color = readyColor;
+                    isCompleted = true;
 
                     if (completeStages == 2)
                     {
@@ -163,6 +155,9 @@ public class SafeDial : MonoBehaviour
                         textCombination.text += $", {combination[2]}";
                     }
                 }
+                break;
+            case 3:
+                if (lastMoveDir != -1) { ResetSafe("Debías girar a la derecha."); return; }
                 break;
         }
     }

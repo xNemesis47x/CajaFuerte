@@ -14,8 +14,12 @@ public class InputPlayer : MonoBehaviour
     private float stepDelay = 0.1f; // tiempo entre pasos
     private float stepTimer = 0f;
 
+    CountdownTimer timer;
+
     private void Start()
     {
+        timer = FindObjectOfType<CountdownTimer>();
+
         CheckCurrentSafe();
         CheckPunteroPosition(currentSafe.transform);
     }
@@ -46,6 +50,18 @@ public class InputPlayer : MonoBehaviour
             }
 
             currentSafe.transform.localRotation = Quaternion.Euler(0f, 0f, -currentSafe.dialPosition * stepSize);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space) && currentSafe.isCompleted)
+        {
+            if (currentSafe.confirmSound != null) currentSafe.confirmSound.Play();
+            timer.unlockedSafes++;
+            currentSafe.IsUnlocked = true;
+
+            if (currentSafe.StageIndicator != null) currentSafe.StageIndicator.color = currentSafe.readyColor;
+
+            timer.CheckWin();
+            MovePlayerToDials();
         }
     }
 
