@@ -1,7 +1,6 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI; // para usar UI Text
 
 public class CountdownTimer : MonoBehaviour
 {
@@ -17,12 +16,15 @@ public class CountdownTimer : MonoBehaviour
 
     void Start()
     {
+        unlockedSafes = 0;  
         timeRemaining = startTime;
         UpdateTimerDisplay();
     }
 
     void Update()
     {
+        ResetGame();
+
         if (!timerRunning) return;
 
         if (timeRemaining > 0)
@@ -58,8 +60,11 @@ public class CountdownTimer : MonoBehaviour
 
     public void ResetGame()
     {
-        SceneManager.LoadScene("Game");
-        Time.timeScale = 1f;
+        if (Input.GetKeyDown(KeyCode.Space) && unlockedSafes >= 3 || Input.GetKeyDown(KeyCode.Space) && !timerRunning)
+        {
+            Time.timeScale = 1f;
+            SceneManager.LoadScene("Game");
+        }
     }
 
     public void CheckWin()
