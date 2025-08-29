@@ -1,4 +1,4 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -7,8 +7,10 @@ public class CountdownTimer : MonoBehaviour
     public float startTime = 45f; // tiempo inicial en segundos, modificable desde el Inspector
     private float timeRemaining;
 
-    public TMP_Text timerText; // arrastrar un Text de UI aqu� desde el Canvas
-    public GameObject generalPanel;
+    public TMP_Text timerText; // arrastrar un Text de UI aquí desde el Canvas
+    public GameObject generalPanel; // 🔹 ya no se usa para win/lose, lo dejamos por si lo necesitás
+    public GameObject winPanel;     // 🔹 nuevo panel para victoria
+    public GameObject losePanel;    // 🔹 nuevo panel para derrota
 
     public int unlockedSafes;
 
@@ -16,9 +18,14 @@ public class CountdownTimer : MonoBehaviour
 
     void Start()
     {
-        unlockedSafes = 0;  
+        unlockedSafes = 0;
         timeRemaining = startTime;
         UpdateTimerDisplay();
+
+        // aseguramos que los paneles estén ocultos al inicio
+        if (winPanel != null) winPanel.SetActive(false);
+        if (losePanel != null) losePanel.SetActive(false);
+        if (generalPanel != null) generalPanel.SetActive(false);
     }
 
     void Update()
@@ -53,9 +60,11 @@ public class CountdownTimer : MonoBehaviour
         Debug.Log("Tiempo terminado!");
 
         Time.timeScale = 0f;
-        TMP_Text tempText = generalPanel.GetComponentInChildren<TMP_Text>(true);
-        tempText.text = "YOU LOST";
-        generalPanel.SetActive(true);
+
+        if (losePanel != null)
+        {
+            losePanel.SetActive(true);
+        }
     }
 
     public void ResetGame()
@@ -72,14 +81,15 @@ public class CountdownTimer : MonoBehaviour
         if (unlockedSafes >= 3)
         {
             Time.timeScale = 0f;
-            TMP_Text tempText = generalPanel.GetComponentInChildren<TMP_Text>(true);
-            tempText.text = "YOU WIN";
-            generalPanel.SetActive(true);
-        }
 
+            if (winPanel != null)
+            {
+                winPanel.SetActive(true);
+            }
+        }
     }
 
-    // --- Opcional: reiniciar timer desde c�digo ---
+    // --- Opcional: reiniciar timer desde código ---
     public void ResetTimer(float newTime)
     {
         startTime = newTime;
