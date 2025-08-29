@@ -24,6 +24,7 @@ public class InputPlayer : MonoBehaviour
     private void Update()
     {
         HandleInput();
+        QuitGame();
     }
 
     void HandleInput()
@@ -78,5 +79,11 @@ public class InputPlayer : MonoBehaviour
         Vector3 posPunter = puntero.transform.position;
         posPunter.x = transform.position.x;
         puntero.transform.position = posPunter;
+    }
+
+    private void QuitGame()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+            Application.Quit();
     }
 }
