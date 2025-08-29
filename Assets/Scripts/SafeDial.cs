@@ -1,5 +1,7 @@
-﻿using TMPro;
+﻿using JetBrains.Annotations;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SafeDial : MonoBehaviour
 {
@@ -10,6 +12,7 @@ public class SafeDial : MonoBehaviour
     public AudioSource correctSound;
     public AudioSource confirmSound;
 
+    public GameObject confirm;
     [SerializeField] private TMP_Text textCombination;
     public int[] combination = new int[3];
     private int currentStage = 0;
@@ -46,6 +49,7 @@ public class SafeDial : MonoBehaviour
         dialPosition = 0;
         stageStartPos = 0;
         stepsAfterMinTurns = 0;
+        confirm.SetActive(false);
 
         if (stageIndicator != null)
             stageIndicator.color = normalColor;
@@ -149,6 +153,8 @@ public class SafeDial : MonoBehaviour
                     currentStage++;
                     isCompleted = true;
 
+                    confirm.SetActive(true);
+
                     if (completeStages == 2)
                     {
                         completeStages++;
@@ -157,7 +163,7 @@ public class SafeDial : MonoBehaviour
                 }
                 break;
             case 3:
-                if (lastMoveDir != -1) { ResetSafe("Debías girar a la derecha."); return; }
+                if (lastMoveDir != -1 || lastMoveDir != 1) { ResetSafe("Debías girar a la derecha."); return; }
                 break;
         }
     }
@@ -170,6 +176,10 @@ public class SafeDial : MonoBehaviour
         stepsAfterMinTurns = 0;
         dialPosition = 0;
         stageStartPos = 0;
+        isCompleted = false;
+
+        confirm.SetActive(false);
+
         if (stageIndicator != null)
             stageIndicator.color = normalColor;
     }

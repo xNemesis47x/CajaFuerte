@@ -11,9 +11,6 @@ public class InputPlayer : MonoBehaviour
     [SerializeField] private int countSafe = 0;
     public GameObject puntero;
 
-    private float stepDelay = 0.1f; // tiempo entre pasos
-    private float stepTimer = 0f;
-
     CountdownTimer timer;
 
     private void Start()
@@ -33,22 +30,15 @@ public class InputPlayer : MonoBehaviour
     {
         if (currentSafe != null && !currentSafe.IsUnlocked)
         {
-            stepTimer -= Time.deltaTime;
 
-            if (stepTimer <= 0f)
+            if (Input.GetKeyDown(KeyCode.RightArrow))
             {
-                if (Input.GetKey(KeyCode.RightArrow))
-                {
-                    currentSafe.Rotate(1);
-                    stepTimer = stepDelay;
-                }
-                else if (Input.GetKey(KeyCode.LeftArrow))
-                {
-                    currentSafe.Rotate(-1);
-                    stepTimer = stepDelay;
-                }
+                currentSafe.Rotate(1);
             }
-
+            else if (Input.GetKeyDown(KeyCode.LeftArrow))
+            {
+                currentSafe.Rotate(-1);
+            }
             currentSafe.transform.localRotation = Quaternion.Euler(0f, 0f, -currentSafe.dialPosition * stepSize);
         }
 
@@ -57,6 +47,7 @@ public class InputPlayer : MonoBehaviour
             if (currentSafe.confirmSound != null) currentSafe.confirmSound.Play();
             timer.unlockedSafes++;
             currentSafe.IsUnlocked = true;
+            currentSafe.confirm.SetActive(false);
 
             if (currentSafe.StageIndicator != null) currentSafe.StageIndicator.color = currentSafe.readyColor;
 
